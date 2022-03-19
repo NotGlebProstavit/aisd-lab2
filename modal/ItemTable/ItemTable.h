@@ -6,12 +6,11 @@
 
 typedef struct ItemTable{
     char* data;
-
     char* key1;
     char* key2;
 } ItemTable;
 
-int itemcpy(ItemTable*, const ItemTable*);
+void itemTableCopy(ItemTable*, const ItemTable*);
 void freeItem(ItemTable*);
 
 #endif //LAB3_ITEMTABLE_H

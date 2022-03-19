@@ -15,5 +15,8 @@ typedef struct KeySpace1{
 int findKey(KeySpace1*, char*); // Need for check unique keys
 int compareKeys(char*, char*); // Function for compare keys
 KeySpace1* addItemToKS1(KeySpace1*, ItemTable*);
+KeySpace1* findByKey1(KeySpace1*, const char*);
+KeySpace1* findByKeys1(KeySpace1*, const char**, int);
+void deleteByKey1(KeySpace1*, const char*);
 
 #endif //LAB3_KEYSPACE1_H
