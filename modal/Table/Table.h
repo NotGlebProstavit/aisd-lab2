@@ -1,6 +1,6 @@
-#include "../KeySpace1/KeySpace1.h"
-#include "../KeySpace2/KeySpace2.h"
-#include "../ItemTable/ItemTable.h"
+#include "KeySpace1.h"
+#include "KeySpace2.h"
+#include "../Item/Item.h"
 
 #ifndef LAB3_TABLE_H
 #define LAB3_TABLE_H
@@ -10,13 +10,29 @@ typedef struct Table{
     int size2; // Size of KeySpace2
 } Table;
 
+//Hash function
 int hash(const char*, int);
 
-Table* addItemToTable(Table*, ItemTable*);
-ItemTable* findItemByKeys(const Table*, const char*, const char*);
-void deleteByKeys(Table*, const char*, const char*);
-Table* findItemByKey(Table*, const char*, int);
-void deleteByKey(Table*, const char*, int);
-void outputTable(const Table*);
+// Find function
+Item* findByComposeKey(const Table*, const char*, const char*);
+KeySpace1* findByKey1(const Table*, const char*); // Copy table (with iterator)
+KeySpace2* findByKey2(const Table*, const char*); // Copy table (with iterator)
+KeySpace1* findByManyKey1(const Table*, const char**, int); // Copy table (will call Iterator)
+KeySpace2* findByReleaseKey2(const Table*, const char*, int); // Copy table (will call Iterator)
+
+// Create table
+Table* createTable(int);
+
+// Add into table
+void add(Table*, Item*); // Second param - source item of table
+
+// Delete function
+void deleteByComposeKey(Table*, const char*, const char*);
+void deleteByKey1(Table*, const char*);
+void deleteByKey2(Table*, const char*, int);
+void refreshTable(Table*);
+
+// Output function
+char* tableToString(const Table*);
 
 #endif //LAB3_TABLE_H
