@@ -118,7 +118,7 @@ KeySpace2* findByReleaseKey2(const Table* table, const char* key, int release){
             answer->release = ks->release;
             answer->data = (Item *) malloc(sizeof(Item));
             itemCopy(answer->data, ks->data);
-            answer->key = (char *) malloc(sizeof(char));
+            answer->key = (char *) calloc(strlen(key) + 1, sizeof(char));
             strcpy(answer->key, key);
             ks = ks->next;
             buf = ks;
