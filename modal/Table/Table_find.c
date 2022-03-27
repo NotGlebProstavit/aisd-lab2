@@ -114,7 +114,7 @@ KeySpace2* findByReleaseKey2(const Table* table, const char* key, int release){
         ks = table->keySpace2 + _hash;
     }
     while(ks != buf){
-        if(strcmp(key, ks->key) == 0 && ks->release == release){
+        if(ks != NULL && ks->key != NULL && strcmp(key, ks->key) == 0 && ks->release == release){
             KeySpace2* answer = (KeySpace2 *) malloc(sizeof(KeySpace2));
             answer->next = NULL;
             answer->release = ks->release;
