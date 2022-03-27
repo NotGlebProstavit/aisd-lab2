@@ -94,8 +94,10 @@ KeySpace1* findByManyKey1(const Table* table, const char** keys, int n){
     KeySpace1* ks = findByKey1(table, keys[0]);
     for(int i = 1; i < n; i++){
         KeySpace1* t = findByKey1(NULL, keys[i]);
-        t->next = ks;
-        ks = t;
+        if(t != NULL) {
+            t->next = ks;
+            ks = t;
+        }
     }
     return ks;
 }
