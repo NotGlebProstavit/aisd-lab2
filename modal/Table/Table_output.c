@@ -10,16 +10,17 @@ char* tableToString(const Table* table){
         char* i = itemToString(item);
         if(s == NULL){
             len = strlen(i);
-            s = (char*) calloc(len + 2, sizeof(char));
+            s = (char*) calloc(len + 3, sizeof(char));
             strcpy(s, i);
-            strcpy(s + len, "\n");
+            strcat(s, "\n");
         } else {
             size_t new_chunk = strlen(i);
-            s = (char*) realloc(s, (len + new_chunk + 2) * sizeof(char));
-            strcpy(s + len, i);
+            s = (char*) realloc(s, (len + new_chunk + 3) * sizeof(char));
+            strcat(s, i);
+            strcat(s, "\n");
             len += new_chunk;
-            strcpy(s + len, "\n");
         }
+        free(i);
         ks = ks->next;
     }
     return s;

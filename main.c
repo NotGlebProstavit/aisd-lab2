@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include "modal/Table/Table.h"
+#include "controller/controller.h"
 
 int main() {
-
+    menu();
     return 0;
 }

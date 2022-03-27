@@ -1,8 +1,8 @@
 #include "Table.h"
 
 void deleteByComposeKey(Table* table, const char* key1, const char* key2){
-    Item* item;
-    if(findByComposeKey(table, key1, key2) == NULL) return;
+    Item* item = findByComposeKey(table, key1, key2);
+    if(item == NULL) return;
     // Destroy link in KeySpace1
     KeySpace1* ks1 = table->keySpace1;
     if(ks1 == NULL) return;
@@ -23,7 +23,7 @@ void deleteByComposeKey(Table* table, const char* key1, const char* key2){
     // Destroy link in KeySpace2
     int hashKey = hash(key2, table->size2);
     KeySpace2* ks2 = table->keySpace2 + hashKey;
-    if(strcmp(ks2->key, key2) == 0 && strcmp(ks2->data->key1, key2) == 0){
+    if(strcmp(ks2->key, key2) == 0 && strcmp(ks2->data->key1, key1) == 0){
         free(ks2->key);
         if(ks2->next == NULL) {
             ks2->key = NULL;
@@ -81,4 +81,35 @@ void refreshTable(Table* table){
             } else ks = ks->next;
         }
     }
+}
+
+void freeTable(Table* table){
+    KeySpace1* ks1 = table->keySpace1;
+    while(ks1 != NULL){
+        KeySpace1* t = ks1;
+        ks1 = ks1->next;
+        free(t->key);
+        freeItem(t->data);
+        free(t->data);
+        free(t);
+    }
+    table->keySpace1 = NULL;
+
+    for(int i = 0; i < table->size2; i++){
+        KeySpace2* ks2 = table->keySpace2 + i;
+        while(ks2 != NULL){
+            KeySpace2* t = ks2;
+            ks2 = ks2->next;
+            free(t->key);
+            if(t == table->keySpace2 + i){
+                table->keySpace2[i].key = NULL;
+                table->keySpace2[i].data = NULL;
+                table->keySpace2[i].next = NULL;
+                table->keySpace2[i].release = 0;
+            } else {
+                free(t);
+            }
+        }
+    }
+    free(table->keySpace2);
 }

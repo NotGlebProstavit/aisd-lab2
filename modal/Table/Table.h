@@ -35,4 +35,7 @@ void refreshTable(Table*);
 // Output function
 char* tableToString(const Table*);
 
+// Clear table
+void freeTable(Table*);
+
 #endif //LAB3_TABLE_H

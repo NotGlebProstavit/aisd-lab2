@@ -17,10 +17,12 @@ KeySpace1* findByKey1(const Table* table, const char* key){
     static KeySpace1* buf = NULL;
     if(table != NULL) {
         head = table->keySpace1;
+        buf = NULL;
     }
     if(ks == NULL){
         ks = head;
     }
+    if(buf != NULL && strlen((char*) buf) == 0) buf = NULL;
     while(ks != buf){
         if(strcmp(ks->key, key) == 0){
             Item* item = (Item*) malloc(sizeof(Item));
@@ -30,8 +32,8 @@ KeySpace1* findByKey1(const Table* table, const char* key){
             elem->next = NULL;
             elem->key = (char*) calloc(strlen(item->key1) + 1, sizeof(char));
             strcpy(elem->key, item->key1);
-            ks = ks->next;
             buf = ks;
+            ks = ks->next;
             return elem;
         }
         ks = ks->next;
@@ -47,10 +49,12 @@ KeySpace2* findByKey2(const Table* table, const char* key){
     if(_hash == -1 || _hash != hashKey){
         _hash = hashKey;
         buf = NULL;
+        ks = NULL;
     }
     if(ks == NULL){
         ks = table->keySpace2 + _hash;
     }
+    if(buf != NULL && strlen((char*) buf) == 0) buf = NULL;
     KeySpace2* answer = NULL;
     while(ks != buf){
         if(strcmp(key, ks->key) == 0){
@@ -60,16 +64,16 @@ KeySpace2* findByKey2(const Table* table, const char* key){
                 answer->release = ks->release;
                 answer->data = (Item*) malloc(sizeof(Item));
                 itemCopy(answer->data, ks->data);
-                answer->key = (char*) malloc(sizeof(char));
+                answer->key = (char*) calloc(strlen(key)+1,sizeof(char));
                 strcpy(answer->key, key);
             } else {
                 KeySpace2* t = (KeySpace2*) malloc(sizeof(KeySpace2));
-                t->next = answer;
                 t->release = ks->release;
                 t->data = (Item*) malloc(sizeof(Item));
                 itemCopy(t->data, ks->data);
-                t->key = (char*) malloc(sizeof(char));
+                t->key = (char*) calloc(strlen(key)+1,sizeof(char));
                 strcpy(t->key, key);
+                t->next = answer;
                 answer = t;
             }
             if(ks->next == NULL || strcmp(ks->next->key, key) != 0){
