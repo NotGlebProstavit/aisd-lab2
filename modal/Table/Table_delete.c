@@ -77,7 +77,7 @@ void deleteByKey2(Table* table, const char* key, int release){
     KeySpace2* ks = table->keySpace2 + hashKey;
     if(ks->data == NULL) return;
     while(ks != NULL){
-        if(strcmp(ks->key, key) == 0 && (release == ks->release || release == -1)){
+        if(ks->key != NULL && strcmp(ks->key, key) == 0 && (release == ks->release || release == -1)){
             KeySpace2* t = ks;
             ks = ks->next;
             deleteByComposeKey(table, t->data->key1, t->key);
