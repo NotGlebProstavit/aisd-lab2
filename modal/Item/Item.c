@@ -28,11 +28,11 @@ Item* createItem(const char* data, const char* key1, const char* key2){
 
 char* itemToString(const Item* item){
     size_t key1 = strlen(item->key1), key2 = strlen(item->key2), data = strlen(item->data);
-    char* s = (char*) calloc(key1 + key2 + data + 7, sizeof(char));
+    char* s = (char*) calloc(key1 + 3 + key2 + 3 + data + 1, sizeof(char));
     strcpy(s, item->key1);
-    strcpy(s+key1, " | ");
-    strcpy(s+key1+3, item->key2);
-    strcpy(s+key1+3+key2, " | ");
-    strcpy(s+key1+3+key2+3, item->data);
+    strcat(s, " | ");
+    strcat(s, item->key2);
+    strcat(s, " | ");
+    strcat(s, item->data);
     return s;
 }
