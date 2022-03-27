@@ -57,7 +57,7 @@ KeySpace2* findByKey2(const Table* table, const char* key){
     if(buf != NULL && strlen((char*) buf) == 0) buf = NULL;
     KeySpace2* answer = NULL;
     while(ks != buf){
-        if(strcmp(key, ks->key) == 0){
+        if(ks != NULL && ks->key != NULL && strcmp(key, ks->key) == 0){
             if(answer == NULL){
                 answer = (KeySpace2*) malloc(sizeof(KeySpace2));
                 answer->next = NULL;
