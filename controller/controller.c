@@ -8,7 +8,7 @@ int getInt(){
         msg = "======[Must be number!]======\n--> ";
         char* ptr;
         int value = (int) strtol(input, &ptr, 10);
-        if(ptr == input + strlen(input)) {
+        if(strlen(input) != 0 && ptr == input + strlen(input)) {
             free(input);
             return value;
         }
@@ -61,19 +61,50 @@ void menu() {
 Table *create() {
     printf("Enter size of the second key space:\n");
     printf("--> ");
-    int size = getInt();
+    char* msg = "";
+    int size;
+    while(1){
+	printf("%s", msg);
+	size = getInt();
+	msg = "======[Size cannot be zero]======\n--> ";
+	if(size != 0) break;
+    }
     Table *table = createTable(size);
     return table;
 }
 
 void addToTable(Table *table) {
+    char* msg = "";
     printf("Enter:\n");
     printf(" Data --> ");
-    char *data = readline("");
+    char *data;
+    while(1){
+	printf("%s", msg);
+	data = readline("");
+	msg = "======[Data cannot be empty]======\n Data--> ";
+	if(strlen(data) != 0) break;
+	free(data);
+    }
+    msg = "";
     printf(" Key1 --> ");
-    char *key1 = readline("");
+    char *key1;
+    while(1){
+        printf("%s", msg);
+        key1 = readline("");
+        msg = "======[Key cannot be empty]======\n Key1--> ";
+        if(strlen(key1) != 0) break;
+        free(key1);
+    }
+    msg = "";
     printf(" Key2 --> ");
-    char *key2 = readline("");
+    char *key2;
+    while(1){
+        printf("%s", msg);
+        key2 = readline("");
+        msg = "======[Key cannot be empty]======\n Key2--> ";
+        if(strlen(key2) != 0) break;
+        free(key2);
+    }
     KeySpace1* ks = findByKey1(table, key1);
     if(ks != NULL){
         free(data);
