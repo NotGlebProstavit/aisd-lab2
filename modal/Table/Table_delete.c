@@ -9,8 +9,18 @@ void deleteByComposeKey(Table* table, const char* key1, const char* key2){
     if(strcmp(key1, ks1->key) == 0){
         item = ks1->data;
         free(ks1->key);
-        table->keySpace1 = ks1->next;
-        free(ks1);
+        if(ks1->next != NULL){
+            KeySpace1* t = ks1->next;
+            ks1->key = (char*) calloc(strlen(t->key) + 1, sizeof(char));
+            strcpy(ks1->key, t->key);
+            ks1->data = t->data;
+            ks1->next = t->next;
+            free(t->key);
+            free(t);
+        } else {
+            ks1->key = NULL;
+            ks1->data = NULL;
+        }
     } else {
         while(ks1->next != NULL && strcmp(ks1->next->key, key1) != 0) ks1 = ks1->next;
         item = ks1->next->data;
@@ -35,6 +45,7 @@ void deleteByComposeKey(Table* table, const char* key1, const char* key2){
             ks2->release = ks2->next->release;
             ks2->data = ks2->next->data;
             KeySpace2* t = ks2->next;
+            ks2->next = t->next;
             free(t->key);
             free(t);
         }
@@ -44,9 +55,11 @@ void deleteByComposeKey(Table* table, const char* key1, const char* key2){
                     strcmp(key1, ks2->next->data->key1) != 0
                 )) ks2 = ks2->next;
         KeySpace2* t = ks2->next;
-        ks2->next = t->next;
-        free(t->key);
-        free(t);
+        if(t != NULL) {
+            ks2->next = t->next;
+            free(t->key);
+            free(t);
+        }
     }
     // Destroy item
     freeItem(item);

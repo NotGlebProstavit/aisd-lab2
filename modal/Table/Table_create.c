@@ -19,5 +19,5 @@ int hash(const char* s, int n){
     for(int i = 0; i < strlen(s); i++){
         h = ((h << 5) + h + s[i]) % n;
     }
-    return h;
+    return h % n;
 }
