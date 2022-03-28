@@ -1,8 +1,11 @@
 SOURCESMODAL = Table_create.c Table_add.c Table_delete.c Table_find.c Table_output.c
 OBJECTSMODAL = Table_create.o Table_add.o Table_delete.o Table_find.o Table_output.o
 
-all: Table_create.o Table_add.o Table_delete.o Table_find.o Table_output.o menu.o controller.o item.o main
+all: build Table_create.o Table_add.o Table_delete.o Table_find.o Table_output.o menu.o controller.o item.o main
 	cc -o lab3a build/*.o -std=c11 -lreadline -g
+
+build:
+	mkdir build
 
 controller.o:
 	cc -o build/controller.o -c controller/controller.c -std=c11 -g
@@ -21,4 +24,3 @@ main:
 
 clean:
 	rm -rf build lab3a
-	mkdir build
