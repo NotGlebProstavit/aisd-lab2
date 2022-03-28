@@ -50,7 +50,7 @@ void deleteByComposeKey(Table* table, const char* key1, const char* key2){
             KeySpace2* t = ks2->next;
             ks2->next = t->next;
             free(t->key);
-            free(t);
+//            free(t);
         }
     } else {
         while(ks2->next != NULL && (
