@@ -86,8 +86,7 @@ void deleteByKey2(Table* table, const char* key, int release){
         if(ks->key != NULL && strcmp(ks->key, key) == 0 && (release == ks->release || release == -1)){
             KeySpace2* t = ks;
             deleteByComposeKey(table, t->data->key1, t->key);
-        }
-        ks = ks->next;
+        } else ks = ks->next;
     }
 }
 
@@ -96,7 +95,7 @@ void refreshTable(Table* table){
         KeySpace2* ks = table->keySpace2 + i;
         while(ks != NULL){
             if(ks->next != NULL && strcmp(ks->key, ks->next->key) == 0){
-                deleteByKey2(table, ks->key, ks->next->release);
+                deleteByComposeKey(table, ks->data->key1, ks->data->key2);
             } else ks = ks->next;
         }
     }
