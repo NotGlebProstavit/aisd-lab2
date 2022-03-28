@@ -37,7 +37,7 @@ void deleteByComposeKey(Table* table, const char* key1, const char* key2){
     // Destroy link in KeySpace2
     int hashKey = hash(key2, table->size2);
     KeySpace2* ks2 = table->keySpace2 + hashKey;
-    if(strcmp(ks2->key, key2) == 0 && strcmp(ks2->data->key1, key1) == 0){
+    if(ks2->key != NULL && ks2->data != NULL && strcmp(ks2->key, key2) == 0 && strcmp(ks2->data->key1, key1) == 0){
         free(ks2->key);
         if(ks2->next == NULL) {
             ks2->key = NULL;
