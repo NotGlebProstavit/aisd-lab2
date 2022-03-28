@@ -55,15 +55,13 @@ void deleteByComposeKey(Table* table, const char* key1, const char* key2){
         }
     } else {
         while(ks2->next != NULL && (
-                strcmp(key2, ks2->next->key) != 0 ||
+                strcmp(key2, ks2->next->key) != 0 &&
                     strcmp(key1, ks2->next->data->key1) != 0
                 )) ks2 = ks2->next;
         KeySpace2* t = ks2->next;
-        if(t != NULL) {
-            ks2->next = t->next;
-            free(t->key);
-            free(t);
-        }
+        ks2->next = t->next;
+        free(t->key);
+        free(t);
     }
     // Destroy item
     freeItem(item);
