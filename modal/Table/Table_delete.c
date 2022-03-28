@@ -73,6 +73,9 @@ void deleteByKey1(Table* table, const char* key){
     KeySpace1* node = findByKey1(table, key);
     if(node == NULL) return;
     deleteByComposeKey(table, key, node->data->key2);
+    freeItem(node->data);
+    free(node->key);
+    free(node);
 }
 
 void deleteByKey2(Table* table, const char* key, int release){
