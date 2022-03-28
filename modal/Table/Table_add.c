@@ -11,7 +11,6 @@ void add(Table* table, Item* item){
 
     // Add to KeySpace2
     int hashKey = hash(item->key2, table->size2);
-    KeySpace2* ptr = table->keySpace2 + hashKey;
     if(table->keySpace2[hashKey].data == NULL){
         table->keySpace2[hashKey].data = item;
         table->keySpace2[hashKey].key = (char*) calloc(strlen(item->key2) + 1, sizeof(char));

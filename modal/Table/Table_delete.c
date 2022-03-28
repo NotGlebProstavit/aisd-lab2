@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "Table.h"
 
 void deleteByComposeKey(Table* table, const char* key1, const char* key2){
@@ -25,6 +26,7 @@ void deleteByComposeKey(Table* table, const char* key1, const char* key2){
         }
     } else {
         while(ks1->next != NULL && strcmp(ks1->next->key, key1) != 0) ks1 = ks1->next;
+        printf("%s\n", ks1->key);
         item = ks1->next->data;
         free(ks1->next->key);
         KeySpace1* t = ks1->next;
