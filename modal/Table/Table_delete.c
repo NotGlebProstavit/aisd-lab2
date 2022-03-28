@@ -74,6 +74,7 @@ void deleteByKey1(Table* table, const char* key){
     if(node == NULL) return;
     deleteByComposeKey(table, key, node->data->key2);
     freeItem(node->data);
+    free(node->data);
     free(node->key);
     free(node);
 }
