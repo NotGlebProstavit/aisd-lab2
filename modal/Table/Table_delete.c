@@ -20,6 +20,8 @@ void deleteByComposeKey(Table* table, const char* key1, const char* key2){
         } else {
             ks1->key = NULL;
             ks1->data = NULL;
+            free(ks1);
+            table->keySpace1 = NULL;
         }
     } else {
         while(ks1->next != NULL && strcmp(ks1->next->key, key1) != 0) ks1 = ks1->next;
@@ -27,6 +29,7 @@ void deleteByComposeKey(Table* table, const char* key1, const char* key2){
         free(ks1->next->key);
         KeySpace1* t = ks1->next;
         ks1->next = t->next;
+        free(t->key);
         free(t);
     }
 
