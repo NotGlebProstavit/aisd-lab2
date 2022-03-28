@@ -131,9 +131,23 @@ void deleteFromTable(Table *table, int mod) {
         case 1: {
             printf("Enter:\n");
             printf(" Key1 --> ");
-            char *key1 = readline("");
+            char *key1, *msg = "";
+            while(1){
+                printf("%s", msg);
+                key1 = readline("");
+                msg = "======[Key cannot be empty]======\n Key1--> ";
+                if(strlen(key1) != 0) break;
+                free(key1);
+            }
             printf(" Key2 --> ");
-            char *key2 = readline("");
+            char *key2; msg = "";
+            while(1){
+                printf("%s", msg);
+                key2 = readline("");
+                msg = "======[Key cannot be empty]======\n Key2--> ";
+                if(strlen(key2) != 0) break;
+                free(key2);
+            }
             deleteByComposeKey(table, key1, key2);
             free(key1);
             free(key2);
@@ -142,7 +156,14 @@ void deleteFromTable(Table *table, int mod) {
         case 2: {
             printf("Enter:\n");
             printf(" Key1 --> ");
-            char *key1 = readline("");
+            char *key1, *msg = "";
+            while(1){
+                printf("%s", msg);
+                key1 = readline("");
+                msg = "======[Key cannot be empty]======\n Key1--> ";
+                if(strlen(key1) != 0) break;
+                free(key1);
+            }
             deleteByKey1(table, key1);
             free(key1);
             break;
@@ -150,7 +171,14 @@ void deleteFromTable(Table *table, int mod) {
         case 3: {
             printf("Enter:\n");
             printf(" Key2 --> ");
-            char *key2 = readline("");
+            char *key2, *msg = "";
+            while(1){
+                printf("%s", msg);
+                key2 = readline("");
+                msg = "======[Key cannot be empty]======\n Key2--> ";
+                if(strlen(key2) != 0) break;
+                free(key2);
+            }
             deleteByKey2(table, key2, -1);
             free(key2);
             break;
