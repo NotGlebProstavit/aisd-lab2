@@ -226,6 +226,7 @@ void findInTable(Table *table, int mod) {
             KeySpace1 *ks = findByKey1(table, key1);
             printKS1(ks);
             if(ks != NULL) {
+		free(ks->key);
                 freeItem(ks->data);
                 free(ks->data);
                 free(ks);
@@ -266,6 +267,7 @@ void findInTable(Table *table, int mod) {
                     ks = ks->next;
                     free(t->key);
                     freeItem(t->data);
+		    free(t->data);
                     free(t);
                 }
             }
