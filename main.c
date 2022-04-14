@@ -1,5 +1,4 @@
-#include <stdio.h>
-#include "controller/controller.h"
+#include "3a/controller/controller.h"
 
 int main() {
     menu();
