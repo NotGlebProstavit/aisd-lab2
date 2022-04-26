@@ -23,6 +23,6 @@ KS1Iterator next1(KS1Iterator);
 void edit1(KS1Iterator, KS1Iterator, KS1Iterator);
 int comp1(KS1Iterator, KS1Iterator);
 
-static const KS1Iterator NULL_ITERATOR1 = {{0,0,(Item){0,0,0,0,0,0},-1}, NULL};
+#define NULL_ITERATOR1 (KS1Iterator){{0,0,(Item){0,0,0,0,0,0},-1}, NULL};
 
 #endif //LAB3_KEYSPACE1_H

@@ -23,6 +23,6 @@ KS2Iterator next2(KS2Iterator);
 void edit2(KS2Iterator, KS2Iterator, KS2Iterator, long int);
 int comp2(KS2Iterator, KS2Iterator);
 
-static const KS2Iterator NULL_ITERATOR2 = {{0,0,{0,0,0,0,0,0},0,-1}, NULL};
+#define NULL_ITERATOR2 (KS2Iterator){{0,0,{0,0,0,0,0,0},0,-1}, NULL};
 
 #endif //LAB3_KEYSPACE2_H

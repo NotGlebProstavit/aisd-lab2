@@ -90,35 +90,20 @@ LittleTable* findByManyKey1(const Table* table, const char** keys, int n){
 
 LittleTable* findByReleaseKey2(const Table* table, const char* key, int release){
     LittleTable* answer = NULL;
-    static long int _hash = -1;
-    static KS2Iterator ks = {{0,0,(Item){0,0,0,0,0,0}, 0,-1}, NULL};
-    static KS2Iterator buf = {{0,0,(Item){0,0,0,0,0,0}, 0,-1}, NULL};
-    long int hashKey = hash(key, table->size);
-    if(_hash == -1 || _hash != hashKey){
-        _hash = hashKey;
-        ks = NULL_ITERATOR2;
-        buf = NULL_ITERATOR2;
-    }
-    if(comp2(ks, NULL_ITERATOR2) == 0){
-        ks = begin2(table->ks2[_hash], table->fn_ks2);
-    }
-    while(comp2(ks, buf) != 0){
+    long int _hash = hash(key, table->size);
+    KS2Iterator ks = begin2(table->ks2[_hash], table->fn_ks2);
+    while(comp2(ks, NULL_ITERATOR2) != 0){
         char* ks_key = getKey2(table->fn_data, value2(ks));
         if(strcmp(key, ks_key) == 0 && ks.ptr.release == release){
             answer = (LittleTable*) malloc(sizeof(LittleTable));
             answer->next = NULL;
             answer->release = ks.ptr.release;
             answer->item = value2(ks);
-            ks = next2(ks);
-            buf = ks;
             free(ks_key);
             return answer;
         }
         free(ks_key);
         ks = next2(ks);
-        if(comp2(ks, NULL_ITERATOR2) == 0 && comp2(buf, NULL_ITERATOR2) != 0) {
-            ks = begin2(table->ks2[_hash], table->fn_ks2);
-        }
     }
     return NULL;
 }
