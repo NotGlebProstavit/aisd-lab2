@@ -66,9 +66,9 @@ void printTable(const Table* t){
     }
 }
 
-void printItem(const Item* i){
-    if(i != NULL) {
-        char *s = itemToString(i);
+void printItem(Item i, const char* fn_data){
+    if(compItem(i, (Item){0,0,0,0,0,0})) {
+        char *s = itemToString(fn_data, i);
         printf("%s\n", s);
         free(s);
     } else {
@@ -76,25 +76,10 @@ void printItem(const Item* i){
     }
 }
 
-void printKS1(const KeySpace1* ks){
-    if(ks == NULL){
-        printf("======[The first key space if empty]=======\n");
-        return;
-    }
-    while(ks != NULL){
-        printItem(ks->data);
-        ks = ks->next;
-    }
-}
-
-void printKS2(const KeySpace2* ks){
-    if(ks == NULL){
-        printf("======[The second key space if empty]=======\n");
-        return;
-    }
-    while(ks != NULL){
-        printf("%d | ", ks->release);
-        printItem(ks->data);
-        ks = ks->next;
+void printLittleTable(LittleTable* lt, Table* table){
+    while(lt != NULL){
+        if(lt->release != -1) printf("%ld | ", lt->release);
+        printItem(lt->item, table->fn_data);
+        lt = lt->next;
     }
 }

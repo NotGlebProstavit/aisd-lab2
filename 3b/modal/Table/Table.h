@@ -9,6 +9,7 @@
 
 typedef struct LittleTable{
     Item item;
+    long int release;
     struct LittleTable* next;
 } LittleTable;
 
@@ -16,13 +17,13 @@ typedef struct Table{
     KeySpace1* ks1;
     char* fn_ks1;
     KeySpace2* ks2;
-    int size;
+    long int size;
     char* fn_ks2;
     char* fn_data;
 } Table;
 
 //Hash function
-int hash(const char*, int);
+long int hash(const char*, long int);
 
 // Find function
 Item findByComposeKey(const Table*, const char*, const char*);
@@ -42,10 +43,10 @@ void saveTable(Table*);
 void add(Table*, const char*, const char*, const char*);
 
 // Delete function
-void deleteByComposeKey(Table*, const char*, const char*);
-void deleteByKey1(Table*, const char*);
-void deleteByKey2(Table*, const char*, int);
-void refreshTable(Table*);
+void deleteByComposeKey(Table**, const char*, const char*, KS2Iterator*);
+void deleteByKey1(Table**, const char*);
+void deleteByKey2(Table**, const char*, int);
+void refreshTable(Table**);
 
 // Output function
 char* tableToString(const Table*);

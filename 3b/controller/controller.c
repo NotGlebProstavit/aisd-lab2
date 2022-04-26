@@ -1,14 +1,14 @@
 #include "controller.h"
 
-int getInt(){
-    char* msg = "";
-    while(1){
+int getInt() {
+    char *msg = "";
+    while (1) {
         printf("%s", msg);
-        char* input = readline("");
+        char *input = readline("");
         msg = "======[Must be number!]======\n--> ";
-        char* ptr;
+        char *ptr;
         int value = (int) strtol(input, &ptr, 10);
-        if(strlen(input) != 0 && ptr == input + strlen(input)) {
+        if (strlen(input) != 0 && ptr == input + strlen(input)) {
             free(input);
             return value;
         }
@@ -16,13 +16,37 @@ int getInt(){
     }
 }
 
+int validFilename(const char* fn){
+    FILE* fd = fopen(fn, "r+b");
+    if(fd == NULL) return 1;
+    fclose(fd);
+    return 0;
+}
+
+
 void menu() {
-    Table *table = create();
+    printf("Do you want:\n");
+    printf("  1) Reload old table\n");
+    printf("  2) Create new table\n");
+    printf("--> ");
+    Table *table;
+    while (1) {
+        int n = getInt();
+        if (n == 1) {
+            table = reload();
+            break;
+        } else if (n == 2) {
+            table = create();
+            break;
+        } else printf("This point doesn't exist\n--> ");
+    }
+
     while (1) {
         printMainMenu();
         int n = getInt();
         switch (n) {
             case 0: {
+                saveTable(table);
                 freeTable(table);
                 free(table);
                 return;
@@ -37,7 +61,7 @@ void menu() {
             case 2: {
                 printDeleteMenu();
                 n = getInt();
-                deleteFromTable(table, n);
+                deleteFromTable(&table, n);
                 break;
             }
             case 3: {
@@ -46,7 +70,7 @@ void menu() {
                 findInTable(table, n);
                 break;
             }
-            case 4:{
+            case 4: {
                 printTable(table);
                 break;
             }
@@ -59,72 +83,163 @@ void menu() {
 }
 
 Table *create() {
+    char *msg = "";
+    char *fn_data, *fn_ks1, *fn_ks2;
+    printf("Enter name of file for data:\n");
+    printf("--> ");
+    while (1) {
+        printf("%s", msg);
+        fn_data = readline("");
+        msg = "======[This file doesn't exist]======\n--> ";
+        if (validFilename(fn_data) == 0) break;
+        else free(fn_data);
+    }
+    msg = "";
+    printf("Enter name of file for KeySpace1:\n");
+    printf("--> ");
+    while (1) {
+        printf("%s", msg);
+        fn_ks1 = readline("");
+        msg = "======[This file doesn't exist]======\n--> ";
+        if (validFilename(fn_ks1) == 0) break;
+        else free(fn_ks1);
+    }
+    msg = "";
+    printf("Enter name of file for KeySpace2:\n");
+    printf("--> ");
+    while (1) {
+        printf("%s", msg);
+        fn_ks2 = readline("");
+        msg = "======[This file doesn't exist]======\n--> ";
+        if (validFilename(fn_ks2) == 0) break;
+        else free(fn_ks2);
+    }
+    msg = "";
     printf("Enter size of the second key space:\n");
     printf("--> ");
-    char* msg = "";
     int size;
-    while(1){
-	printf("%s", msg);
-	size = getInt();
-	msg = "======[Size cannot be zero]======\n--> ";
-	if(size != 0) break;
+    while (1) {
+        printf("%s", msg);
+        size = getInt();
+        msg = "======[Size cannot be zero]======\n--> ";
+        if (size != 0) break;
     }
-    Table *table = createTable(size);
+    Table *table = createTable(fn_ks1, fn_ks2, fn_data, size);
+    free(fn_data);
+    free(fn_ks1);
+    free(fn_ks2);
+    return table;
+}
+
+
+Table *reload() {
+    char *msg = "";
+    char *fn_data, *fn_ks1, *fn_ks2;
+    printf("Enter name of file for data:\n");
+    printf("--> ");
+    while (1) {
+        printf("%s", msg);
+        fn_data = readline("");
+        msg = "======[This file doesn't exist]======\n--> ";
+        if (validFilename(fn_data) == 0){
+            FILE* fd = fopen(fn_data, "r+w");
+            long int t1 = ftell(fd);
+            fseek(fd, 0L, SEEK_END);
+            long int t2 = ftell(fd);
+            fclose(fd);
+            if(t2 - t1 != 0) break;
+            msg = "======[This file is empty]======";
+        } else free(fn_data);
+    }
+    msg = "";
+    printf("Enter name of file for KeySpace1:\n");
+    printf("--> ");
+    while (1) {
+        printf("%s", msg);
+        fn_ks1 = readline("");
+        msg = "======[This file doesn't exist]======\n--> ";
+        if (validFilename(fn_ks1) == 0){
+            FILE* fd = fopen(fn_ks1, "r+w");
+            long int t1 = ftell(fd);
+            fseek(fd, 0L, SEEK_END);
+            long int t2 = ftell(fd);
+            fclose(fd);
+            if(t2 - t1 != 0) break;
+            msg = "======[This file is empty]======";
+        } else free(fn_ks1);
+    }
+    msg = "";
+    printf("Enter name of file for KeySpace2:\n");
+    printf("--> ");
+    while (1) {
+        printf("%s", msg);
+        fn_ks2 = readline("");
+        msg = "======[This file doesn't exist]======\n--> ";
+        if (validFilename(fn_ks2) == 0){
+            FILE* fd = fopen(fn_ks2, "r+w");
+            long int t1 = ftell(fd);
+            fseek(fd, 0L, SEEK_END);
+            long int t2 = ftell(fd);
+            fclose(fd);
+            if(t2 - t1 != 0) break;
+            msg = "======[This file is empty]======";
+        } else free(fn_ks2);
+    }
+    Table *table = downloadTable(fn_ks1, fn_ks2, fn_data);
+    free(fn_data);
+    free(fn_ks1);
+    free(fn_ks2);
     return table;
 }
 
 void addToTable(Table *table) {
-    char* msg = "";
+    char *msg = "";
     printf("Enter:\n");
     printf(" Data --> ");
     char *data;
-    while(1){
-	printf("%s", msg);
-	data = readline("");
-	msg = "======[Data cannot be empty]======\n Data--> ";
-	if(strlen(data) != 0) break;
-	free(data);
+    while (1) {
+        printf("%s", msg);
+        data = readline("");
+        msg = "======[Data cannot be empty]======\n Data--> ";
+        if (strlen(data) != 0) break;
+        free(data);
     }
     msg = "";
     printf(" Key1 --> ");
     char *key1;
-    while(1){
+    while (1) {
         printf("%s", msg);
         key1 = readline("");
         msg = "======[Key cannot be empty]======\n Key1--> ";
-        if(strlen(key1) != 0) break;
+        if (strlen(key1) != 0) break;
         free(key1);
     }
     msg = "";
     printf(" Key2 --> ");
     char *key2;
-    while(1){
+    while (1) {
         printf("%s", msg);
         key2 = readline("");
         msg = "======[Key cannot be empty]======\n Key2--> ";
-        if(strlen(key2) != 0) break;
+        if (strlen(key2) != 0) break;
         free(key2);
     }
-    KeySpace1* ks = findByKey1(table, key1);
-    if(ks != NULL){
+    LittleTable *ks = findByKey1(table, key1);
+    if (ks != NULL) {
         free(data);
         free(key1);
         free(key2);
-        free(ks->key);
-        freeItem(ks->data);
-        free(ks->data);
         free(ks);
         printf("======[The first key must be unique!]======\n");
         return;
     }
-    Item *item = createItem(data, key1, key2);
+    add(table, key1, key2, data);
     free(data);
     free(key1);
     free(key2);
-    add(table, item);
 }
 
-void deleteFromTable(Table *table, int mod) {
+void deleteFromTable(Table **table, int mod) {
     switch (mod) {
         case 0:
             break;
@@ -132,23 +247,24 @@ void deleteFromTable(Table *table, int mod) {
             printf("Enter:\n");
             printf(" Key1 --> ");
             char *key1, *msg = "";
-            while(1){
+            while (1) {
                 printf("%s", msg);
                 key1 = readline("");
                 msg = "======[Key cannot be empty]======\n Key1--> ";
-                if(strlen(key1) != 0) break;
+                if (strlen(key1) != 0) break;
                 free(key1);
             }
             printf(" Key2 --> ");
-            char *key2; msg = "";
-            while(1){
+            char *key2;
+            msg = "";
+            while (1) {
                 printf("%s", msg);
                 key2 = readline("");
                 msg = "======[Key cannot be empty]======\n Key2--> ";
-                if(strlen(key2) != 0) break;
+                if (strlen(key2) != 0) break;
                 free(key2);
             }
-            deleteByComposeKey(table, key1, key2);
+            deleteByComposeKey(table, key1, key2, NULL);
             free(key1);
             free(key2);
             break;
@@ -157,11 +273,11 @@ void deleteFromTable(Table *table, int mod) {
             printf("Enter:\n");
             printf(" Key1 --> ");
             char *key1, *msg = "";
-            while(1){
+            while (1) {
                 printf("%s", msg);
                 key1 = readline("");
                 msg = "======[Key cannot be empty]======\n Key1--> ";
-                if(strlen(key1) != 0) break;
+                if (strlen(key1) != 0) break;
                 free(key1);
             }
             deleteByKey1(table, key1);
@@ -172,11 +288,11 @@ void deleteFromTable(Table *table, int mod) {
             printf("Enter:\n");
             printf(" Key2 --> ");
             char *key2, *msg = "";
-            while(1){
+            while (1) {
                 printf("%s", msg);
                 key2 = readline("");
                 msg = "======[Key cannot be empty]======\n Key2--> ";
-                if(strlen(key2) != 0) break;
+                if (strlen(key2) != 0) break;
                 free(key2);
             }
             deleteByKey2(table, key2, -1);
@@ -213,8 +329,8 @@ void findInTable(Table *table, int mod) {
             char *key1 = readline("");
             printf(" Key2 --> ");
             char *key2 = readline("");
-            Item *item = findByComposeKey(table, key1, key2);
-            printItem(item);
+            Item item = findByComposeKey(table, key1, key2);
+            printItem(item, table->fn_data);
             free(key1);
             free(key2);
             break;
@@ -223,12 +339,9 @@ void findInTable(Table *table, int mod) {
             printf("Enter:\n");
             printf(" Key1 --> ");
             char *key1 = readline("");
-            KeySpace1 *ks = findByKey1(table, key1);
-            printKS1(ks);
-            if(ks != NULL) {
-		free(ks->key);
-                freeItem(ks->data);
-                free(ks->data);
+            LittleTable *ks = findByKey1(table, key1);
+            printLittleTable(ks, table);
+            if (ks != NULL) {
                 free(ks);
             }
             free(key1);
@@ -238,14 +351,11 @@ void findInTable(Table *table, int mod) {
             printf("Enter:\n");
             printf(" Key2 --> ");
             char *key2 = readline("");
-            KeySpace2 *ks = findByKey2(table, key2);
-            printKS2(ks);
+            LittleTable *ks = findByKey2(table, key2);
+            printLittleTable(ks, table);
             while (ks != NULL) {
-                KeySpace2 *t = ks;
+                LittleTable *t = ks;
                 ks = ks->next;
-                free(t->key);
-                freeItem(t->data);
-                free(t->data);
                 free(t);
             }
             free(key2);
@@ -258,16 +368,13 @@ void findInTable(Table *table, int mod) {
             for (int i = 0; i < n; i++) {
                 keys[i] = readline("--> ");
             }
-            KeySpace1 *ks = findByManyKey1(table, (const char **) keys, n);
-            printKS1(ks);
-            for(int i = 0; i < n; i++){
+            LittleTable *ks = findByManyKey1(table, (const char **) keys, n);
+            printLittleTable(ks, table);
+            for (int i = 0; i < n; i++) {
                 free(keys[i]);
-                KeySpace1 *t = ks;
-                if(ks != NULL){
+                LittleTable *t = ks;
+                if (ks != NULL) {
                     ks = ks->next;
-                    free(t->key);
-                    freeItem(t->data);
-		    free(t->data);
                     free(t);
                 }
             }
@@ -280,12 +387,9 @@ void findInTable(Table *table, int mod) {
             char *key2 = readline("");
             printf(" Release --> ");
             int release = getInt();
-            KeySpace2 *ks = findByReleaseKey2(table, key2, release);
-            printKS2(ks);
-            if(ks != NULL) {
-                free(ks->key);
-                freeItem(ks->data);
-                free(ks->data);
+            LittleTable *ks = findByReleaseKey2(table, key2, release);
+            printLittleTable(ks, table);
+            if (ks != NULL) {
                 free(ks);
             }
             free(key2);

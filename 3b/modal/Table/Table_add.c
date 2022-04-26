@@ -1,12 +1,12 @@
 #include "Table.h"
 
 void add(Table* table, const char* k1, const char* k2, const char* data){
-    Item item = {0,0,0,0,0};
+    Item item = {0,0,0,0,0,0};
     item.len_key1 = strlen(k1);
     item.len_key2 = strlen(k2);
     item.len_data = strlen(data);
     // Save data
-    FILE* fdata = fopen(table->fn_data, "w+b");
+    FILE* fdata = fopen(table->fn_data, "r+b");
     fseek(fdata, 0L, SEEK_END);
     item.offset_key1 = ftell(fdata);
     fwrite(k1, sizeof(char), item.len_key1, fdata);
@@ -16,77 +16,143 @@ void add(Table* table, const char* k1, const char* k2, const char* data){
     fwrite(data, sizeof(char), item.len_data, fdata);
     fclose(fdata);
     // Save in KeySpace1
-    KS1Iterator e1 = end1(table->ks1, table->fn_ks1);
-    FILE* fd = fopen(table->fn_ks1, "w+b");
-    fseek(fd, 0L, SEEK_END);
-    KS1Iterator new_e1 = e1;
-    new_e1.ptr->offset_next = ftell(fd);
-    int offset_end = -1;
-    fwrite(&(item.offset_key1), sizeof(int), 1, fd);
-    fwrite(&(item.len_key1), sizeof(int), 1, fd);
-    fwrite(&(item), sizeof(Item), 1, fd);
-    fwrite(&(offset_end), sizeof(int), 1, fd);
-    fclose(fd);
-    edit1((KS1Iterator){table->ks1, table->fn_ks2}, e1, new_e1);
-    e1 = next1(e1);
-    table->ks1 = e1.ptr;
+    if(compItem(table->ks1->item, (Item){0,0,0,0,0,0}) == 0){
+        table->ks1->offset_key = item.offset_key1;
+        table->ks1->len_key = item.len_key1;
+        table->ks1->item = item;
+        table->ks1->offset_next = -1;
+        FILE* fd = fopen(table->fn_ks1, "w+b");
+        fwrite(&(table->ks1->offset_key), sizeof(long int), 1, fd);
+        fwrite(&(table->ks1->len_key), sizeof(long int), 1, fd);
+        saveItem(fd, table->ks1->item);
+        fwrite(&(table->ks1->offset_next), sizeof(long int), 1, fd);
+        fclose(fd);
+    } else if(table->ks1->offset_next == -1) {
+        FILE* fd = fopen(table->fn_ks1, "r+b");
+        fseek(fd, 0L, SEEK_END);
+        table->ks1->offset_next = ftell(fd);
+        fseek(fd, 8*sizeof(long int), SEEK_SET);
+        fwrite(&(table->ks1->offset_next), sizeof(long int), 1, fd);
+        KeySpace1 ks = {item.offset_key1, item.len_key1, item, -1};
+        fwrite(&(ks.offset_key), sizeof(long int), 1, fd);
+        fwrite(&(ks.len_key), sizeof(long int), 1, fd);
+        saveItem(fd, ks.item);
+        fwrite(&(ks.offset_next), sizeof(long int), 1, fd);
+        fclose(fd);
+    } else {
+        KS1Iterator end = end1(*(table->ks1), table->fn_ks1), new_end = end;
+        FILE* fd = fopen(table->fn_ks1, "r+b");
+        fseek(fd, 0L, SEEK_END);
+        new_end.ptr.offset_next = ftell(fd);
+        fclose(fd);
+        edit1(begin1(*(table->ks1), table->fn_ks1), end, new_end);
+        fd = fopen(table->fn_ks1, "r+b");
+        fseek(fd, 0L, SEEK_END);
+        KeySpace1 ks = {item.offset_key1, item.len_key1, item, -1};
+        fwrite(&(ks.offset_key), sizeof(long int), 1, fd);
+        fwrite(&(ks.len_key), sizeof(long int), 1, fd);
+        saveItem(fd, ks.item);
+        fwrite(&(ks.offset_next), sizeof(long int), 1, fd);
+        fclose(fd);
+    }
     // Save in KeySpace2
-    int hashKey = hash(k2, table->size);
-    if(compItem(table->ks2[hashKey].item, (Item){0,0,0,0,0,0})){
+    long int hashKey = hash(k2, table->size);
+    if(compItem(table->ks2[hashKey].item, (Item){0,0,0,0,0,0}) == 0){
         copyItem(&(table->ks2[hashKey].item), &item);
-        table->ks2[hashKey].release = 0;
+        table->ks2[hashKey].release = 1;
         table->ks2[hashKey].offset_next = -1;
         table->ks2[hashKey].offset_key = item.offset_key2;
         table->ks2[hashKey].len_key = item.len_key2;
 
-        fd = fopen(table->fn_ks2, "w+b");
-        fseek(fd, sizeof(int) + hashKey*sizeof(KeySpace2), SEEK_SET);
-        fwrite(table->ks2 + hashKey, sizeof(KeySpace2), 1, fd);
+        FILE* fd = fopen(table->fn_ks2, "r+b");
+        fseek(fd, sizeof(long int) + hashKey*10*sizeof(long int), SEEK_SET);
+        fwrite(&(table->ks2[hashKey].offset_key), sizeof(long int), 1, fd);
+        fwrite(&(table->ks2[hashKey].len_key), sizeof(long int), 1, fd);
+        saveItem(fd, table->ks2[hashKey].item);
+        fwrite(&(table->ks2[hashKey].release), sizeof(long int), 1, fd);
+        fwrite(&(table->ks2[hashKey].offset_next), sizeof(long int), 1, fd);
         fclose(fd);
     } else {
         char* key2 = getKey2(table->fn_data, table->ks2[hashKey].item);
-        if(strcmp(key2, k2) == 0){
-            fd = fopen(table->fn_ks2, "w+b");
+        if (strcmp(key2, k2) == 0) {
+            KeySpace2 ks = table->ks2[hashKey];
+
+            FILE* fd = fopen(table->fn_ks2, "r+b");
             fseek(fd, 0L, SEEK_END);
-            int offset = ftell(fd);
-            fwrite(&(table->ks2[hashKey]), sizeof(KeySpace2), 1, fd);
-            table->ks2[hashKey].offset_next = offset;
+
+            table->ks2[hashKey].offset_next = ftell(fd);
             table->ks2[hashKey].offset_key = item.offset_key2;
             table->ks2[hashKey].len_key = item.len_key2;
-            table->ks2[hashKey].release++;
             copyItem(&(table->ks2[hashKey].item), &item);
-            fseek(fd, sizeof(int)+ hashKey*sizeof(KeySpace2), SEEK_SET);
-            fwrite(table->ks2 + hashKey, sizeof(KeySpace2), 1, fd);
+            table->ks2[hashKey].release = ks.release + 1;
+
+            fwrite(&(ks.offset_key), sizeof(long int), 1, fd);
+            fwrite(&(ks.len_key), sizeof(long int), 1, fd);
+            saveItem(fd, ks.item);
+            fwrite(&(ks.release), sizeof(long int), 1, fd);
+            fwrite(&(ks.offset_next), sizeof(long int), 1, fd);
+
+            fseek(fd, (1 + 10*hashKey)*sizeof(long int), SEEK_SET);
+
+            fwrite(&(table->ks2[hashKey].offset_key), sizeof(long int), 1, fd);
+            fwrite(&(table->ks2[hashKey].len_key), sizeof(long int), 1, fd);
+            saveItem(fd, table->ks2[hashKey].item);
+            fwrite(&(table->ks2[hashKey].release), sizeof(long int), 1, fd);
+            fwrite(&(table->ks2[hashKey].offset_next), sizeof(long int), 1, fd);
+
             fclose(fd);
         } else {
-            KS2Iterator it = begin2(table->ks2 + hashKey, table->fn_ks2);
-            KS2Iterator next = next2(it);
-            while(comp2(next, (KS2Iterator){NULL, NULL}) != 0){
-                char* k = getKey2(table->fn_data, value2(next));
-                if(strcmp(k, key2) != 0){
+            KS2Iterator it = begin2(table->ks2[hashKey], table->fn_ks2), next = next2(it);
+
+            while(comp2(next, NULL_ITERATOR2) != 0){
+                char* next_key = getKey2(table->fn_data, next.ptr.item);
+                if(strcmp(next_key, k2) == 0 ){
+                    free(next_key);
+                    break;
+                } else {
+                    free(next_key);
                     it = next;
                     next = next2(it);
-                    free(k);
-                } else {
-                    free(k);
-                    break;
                 }
             }
-            fd = fopen(table->fn_ks2, "w+b");
-            fseek(fd, 0L, SEEK_END);
-            int offset = ftell(fd);
-            KeySpace2 ks = {item.offset_key2, item.len_key2, item, 0, -1};
-            if(comp2(next, (KS2Iterator){NULL, NULL}) == 0){
-                ks.release = 1;
+            if(comp2(next, NULL_ITERATOR2) == 0) {
+                FILE* fd = fopen(table->fn_ks2, "r+b");
+                fseek(fd, 0L, SEEK_END);
+                KS2Iterator new_it = it;
+                new_it.ptr.offset_next = ftell(fd);
+                fclose(fd);
+                edit2(begin2(table->ks2[hashKey], table->fn_ks2), it, new_it, hashKey);
+                if(comp2(it, begin2(table->ks2[hashKey], table->fn_ks2)) == 0)
+                    table->ks2[hashKey].offset_next = new_it.ptr.offset_next;
+                fd = fopen(table->fn_ks2, "r+b");
+                fseek(fd, 0L, SEEK_END);
+                KeySpace2 ks = {item.offset_key2, item.len_key2, item, 1, -1};
+                fwrite(&(ks.offset_key), sizeof(long int), 1, fd);
+                fwrite(&(ks.len_key), sizeof(long int), 1, fd);
+                saveItem(fd, ks.item);
+                fwrite(&(ks.release), sizeof(long int), 1, fd);
+                fwrite(&(ks.offset_next), sizeof(long int), 1, fd);
+                fclose(fd);
             } else {
-                ks.release = next.ptr->release + 1;
-                ks.offset_next = it.ptr->offset_next;
+                FILE* fd = fopen(table->fn_ks2, "r+b");
+                fseek(fd, 0L, SEEK_END);
+                KS2Iterator new_it = it;
+                new_it.ptr.offset_next = ftell(fd);
+                long int offset = it.ptr.offset_next;
+                fclose(fd);
+                edit2(begin2(table->ks2[hashKey], table->fn_ks2), it, new_it, hashKey);
+                if(comp2(it, begin2(table->ks2[hashKey], table->fn_ks2)) == 0)
+                    table->ks2[hashKey].offset_next = new_it.ptr.offset_next;
+                fd = fopen(table->fn_ks2, "r+b");
+                fseek(fd, 0L, SEEK_END);
+                KeySpace2 ks = {item.offset_key2, item.len_key2, item, it.ptr.release + 1, offset};
+                fwrite(&(ks.offset_key), sizeof(long int), 1, fd);
+                fwrite(&(ks.len_key), sizeof(long int), 1, fd);
+                saveItem(fd, ks.item);
+                fwrite(&(ks.release), sizeof(long int), 1, fd);
+                fwrite(&(ks.offset_next), sizeof(long int), 1, fd);
+                fclose(fd);
             }
-            fwrite(&ks, sizeof(KeySpace2), 1, fd);
-            fclose(fd);
-            KS2Iterator new_it = it;
-            it.ptr->offset_next = offset;
-            edit2((KS2Iterator){table->ks2 + hashKey, table->fn_ks2}, it, new_it);
         }
         free(key2);
     }

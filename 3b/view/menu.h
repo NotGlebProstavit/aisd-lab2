@@ -11,7 +11,6 @@ void printAddMenu();
 void printDeleteMenu();
 void printErrorMessage();
 void printTable(const Table*);
-void printItem(const Item*);
-void printKS1(const KeySpace1*);
-void printKS2(const KeySpace2*);
+void printItem(Item, const char*);
+void printLittleTable(LittleTable*, Table*);
 #endif //LAB3_MENU_H
